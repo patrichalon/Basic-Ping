@@ -1,4 +1,4 @@
-# pping
+# pping - by Alon Patrich (yes its a copy of ping)
 
 A lightweight Python implementation of the Windows `ping` utility using raw ICMP sockets. Built from scratch with Python's standard library, `pping` crafts raw ICMP Echo Request packets, calculates 16-bit one's complement checksums, measures round-trip latency, and reports Windows-style ping statistics.
 
