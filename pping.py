@@ -43,9 +43,9 @@ def ping(dest_ip : str , count : int):
         packet = struct.pack("!BBHHH", 8, 0, checksum, packet_id, seq) + payload
 
         # 2. Send packet
-        sock.sendto(packet, (dest_ip, 0))
-        sent += 1
         try:
+                sock.sendto(packet, (dest_ip, 0))
+                sent += 1
                 while True:
                     raw_data, addr = sock.recvfrom(1024)
                     recv_time = time.time()
@@ -69,6 +69,10 @@ def ping(dest_ip : str , count : int):
 
         except socket.timeout:
                 print("Request timed out.")
+        except socket.gaierror:
+             print(f"Unable to reach host: {dest_ip} -> pls check its in ipv4 format.")
+             print("for example 8.8.8.8 or 1.2.3.4")
+             return
 
         time.sleep(1)  # Wait 1 second before the next ping
 
@@ -129,7 +133,8 @@ if __name__ == "__main__":
         print("Not enough arguments given to the program")
         help() #print help message and return
         sys.exit(1)
-    
+    elif(len(args) > 2):
+        pass #check for arguments. 
         
     #in the sys argv after run the argv[0] is pping.py and then the next are actual program args
     ping(sys.argv[-1], 4)
