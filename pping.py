@@ -32,6 +32,8 @@ def ping(dest_ip : str , count : int):
 
     print(f"Pinging {dest_ip}:")
 
+    sent = 0
+    round_trip_times = []
     for seq in range(1, count + 1):
         # 1. Build packet with current timestamp
         send_time = time.time()
@@ -42,6 +44,7 @@ def ping(dest_ip : str , count : int):
 
         # 2. Send packet
         sock.sendto(packet, (dest_ip, 0))
+        sent += 1
         try:
                 while True:
                     raw_data, addr = sock.recvfrom(1024)
@@ -58,6 +61,7 @@ def ping(dest_ip : str , count : int):
                     # Ignore ICMP packets meant for other programs
                     if icmp_type == 0 and recv_id == packet_id and recv_seq == seq:
                         rtt = (recv_time - send_time) * 1000
+                        round_trip_times.append(rtt)
                         print(
                             f"Reply from {addr[0]}: bytes={len(raw_data)-20} time={rtt:.2f}ms TTL={ttl}"
                         )
@@ -67,6 +71,31 @@ def ping(dest_ip : str , count : int):
                 print("Request timed out.")
 
         time.sleep(1)  # Wait 1 second before the next ping
+
+    sock.close()
+
+    received = len(round_trip_times)
+    lost = sent - received
+    loss_percentage = (lost / sent * 100) if sent else 0
+
+    print(f"\nPing statistics for {dest_ip}:")
+    print(
+        f"    Packets: Sent = {sent}, Received = {received}, "
+        f"Lost = {lost} ({loss_percentage:.0f}% loss),"
+    )
+
+    if round_trip_times:
+        minimum = min(round_trip_times)
+        maximum = max(round_trip_times)
+        average = sum(round_trip_times) / received
+    else:
+        minimum = maximum = average = 0
+
+    print(
+        "Approximate round trip times in milli-seconds:"
+        f"\n    Minimum = {minimum:.2f}ms, Maximum = {maximum:.2f}ms, "
+        f"Average = {average:.2f}ms"
+    )
 
 
 
