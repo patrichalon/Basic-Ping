@@ -16,7 +16,7 @@ this is a standard code for the ping command on windows
 packet_size = 32 # in bytes. can change based on flag -n
 number_of_packets  = 4 # can change based on flag -p
 
-def send_pack(dest_ip : str , count : int):
+def ping(dest_ip : str , count : int):
     """
     send pack purpose is to send 4 to the target. 
     """
@@ -30,7 +30,7 @@ def send_pack(dest_ip : str , count : int):
     packet_id = os.getpid() & 0xFFFF
     #instilize a socket that uses imcp as protocol (level bellow tcp and udp)
 
-    print("Pinging {dest_ip}:")
+    print(f"Pinging {dest_ip}:")
 
     for seq in range(1, count + 1):
         # 1. Build packet with current timestamp
@@ -103,7 +103,7 @@ if __name__ == "__main__":
     
         
     #in the sys argv after run the argv[0] is pping.py and then the next are actual program args
-    send_pack(sys.argv[-1], 4)
+    ping(sys.argv[-1], 4)
     #the last argument is expected to be the destination.
 
 
