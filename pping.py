@@ -16,7 +16,7 @@ this is a standard code for the ping command on windows
 packet_size = 32 # in bytes. can change based on flag -n
 number_of_packets  = 4 # can change based on flag -p
 
-def ping(dest_ip : str , count : int):
+def ping(dest_ip : str , count : int, size :int):
     """
     send pack purpose is to send 4 to the target. 
     """
@@ -30,14 +30,14 @@ def ping(dest_ip : str , count : int):
     packet_id = os.getpid() & 0xFFFF
     #instilize a socket that uses imcp as protocol (level bellow tcp and udp)
 
-    print(f"Pinging {dest_ip}:")
+    print(f"Pinging {dest_ip} with {size} bytes of data:")
 
     sent = 0
     round_trip_times = []
     for seq in range(1, count + 1):
         # 1. Build packet with current timestamp
         send_time = time.time()
-        payload = struct.pack("!d", send_time) + b"ping_test"
+        payload = bytes(size)
         temp_header = struct.pack("!BBHHH", 8, 0, 0, packet_id, seq)
         checksum = calculate_checksum(temp_header + payload)
         packet = struct.pack("!BBHHH", 8, 0, checksum, packet_id, seq) + payload
@@ -63,7 +63,7 @@ def ping(dest_ip : str , count : int):
                         rtt = (recv_time - send_time) * 1000
                         round_trip_times.append(rtt)
                         print(
-                            f"Reply from {addr[0]}: bytes={len(raw_data)-20} time={rtt:.2f}ms TTL={ttl}"
+                            f"Reply from {addr[0]}: bytes={len(raw_data)-28} time={rtt:.2f}ms TTL={ttl}"
                         )
                         break
 
@@ -122,6 +122,19 @@ def calculate_checksum(data: bytes) -> int:
     checksum = ~total & 0xFFFF
     return checksum
 
+def check_for_arguments(arguments) ->tuple:
+    count = 4
+    size = 25
+    for i in range(0,len(arguments),2):
+        if arguments[i] in ['-n','-N'] and arguments[i+1].isdigit():
+            count = int(arguments[i+1])
+        elif arguments[i] in ['-l','-L'] and arguments[i+1].isdigit():
+            size = int(arguments[i+1])
+    return count , size 
+
+        
+
+
 def help():
     print("Usage: pping.py <flags> <destination>")
     print("     *flags isn't mandatory but destination is.")
@@ -134,10 +147,13 @@ if __name__ == "__main__":
         help() #print help message and return
         sys.exit(1)
     elif(len(args) > 2):
-        pass #check for arguments. 
+        count , size = check_for_arguments(args[1:-1]) 
+    else:
+        count = 4
+        size = 25
         
     #in the sys argv after run the argv[0] is pping.py and then the next are actual program args
-    ping(sys.argv[-1], 4)
+    ping(sys.argv[-1], count ,size)
     #the last argument is expected to be the destination.
 
 
